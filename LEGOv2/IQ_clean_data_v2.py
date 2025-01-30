@@ -71,20 +71,31 @@ def increment_triple_nested_count(nested_dict, key1, key2, key3):
 
 def count_entities(data_list):
     """Counts the occurrences of entities within square brackets."""
-    nested_counts = defaultdict(lambda:defaultdict(lambda: defaultdict(int)))
-    
+    nested_counts = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+
     for item in data_list:
-        if isinstance(item, str) and "[" in item:
-            match = re.search(r"(\w+)\s*\[", item)
-            if match:
-                token = match.group(1)
-                bracket_matches = re.findall(r"\[([^\]]+)\]", item)
-                if bracket_matches:
-                    key2 = bracket_matches[0]
-                    for i in range(1, len(bracket_matches)): # the rest are key3
-                        key3 = bracket_matches[i]
-                        increment_triple_nested_count(nested_counts, token, key2, key3)
-    print(nested_counts)
+        if isinstance(item, str):
+            parts = re.split(r"\)\s*", item)  # Split by ) followed by whitespace
+
+            for i, part in enumerate(parts):
+                if "[" in part: # Only process parts with brackets
+                    match = re.search(r"(\w+)\s*\[", part)  # Find token before bracket
+                    if match:
+                        token = match.group(1)
+                        bracket_matches = re.findall(r"\[([^\]]+)\]", part)
+                        if bracket_matches:
+                            key2 = bracket_matches[0]
+                            for j in range(1, len(bracket_matches)):
+                                key3 = bracket_matches[j]
+                                increment_triple_nested_count(nested_counts, token, key2, key3)
+                    elif i > 0: # If no match but it's not the first part, it's a standalone token
+                        standalone_token = part.split()[0] # Get the first word
+                        bracket_matches = re.findall(r"\[([^\]]+)\]", part)
+                        if bracket_matches:
+                            key2 = bracket_matches[0]
+                            for k in range(1, len(bracket_matches)):
+                                key3 = bracket_matches[k]
+                                increment_triple_nested_count(nested_counts, standalone_token, key2, key3)
     return dict(nested_counts)
 
 def analyse_data(data, specific_column):
