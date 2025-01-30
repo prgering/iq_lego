@@ -48,7 +48,7 @@ def drop_shifted_rows(data, columns):
         data = data.drop(numerical_rows.index)
     return data
 
-def read_clean_write_data(data, column_names, removal_columns, dummy_columns):
+def read_clean_write_data(data, column_names, removal_columns, dummy_columns, new_name):
     """
     Function to read and clean the data from Schmitt et al. (2011)
     """
@@ -68,12 +68,12 @@ def read_clean_write_data(data, column_names, removal_columns, dummy_columns):
     df = df.dropna(subset=["IQAverage"])
     df_dropped = df.drop(removal_columns, axis=1)
     df_dummy = pd.get_dummies(data=df_dropped, columns=dummy_columns)
-    df_dummy(New_file, index = False, header = True) 
+    df_dummy.to_csv(new_name, index = False, header = True) 
     return df_dummy
 
 # Code
 if __name__ == "__main__":
-    base_path = Path("/home/paulgering/Documents/PhD/multimodal_data/LEGOv2/corpus")
+    base_path = Path("/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/corpus")
     IQ_file = base_path / "csv/interactions.csv"
     New_file = base_path / "csv/clean_interactions.csv"
     Read_me = base_path.parent / "readme.txt"    
@@ -82,12 +82,12 @@ if __name__ == "__main__":
     dummy_columns = ["ExMo", "ActivityType", "RoleName", "LoopName"]
 
     column_names = get_headers(Read_me, additional_col)
-    cleaned_df = read_clean_write_data(IQ_file, column_names, removal_columns, dummy_columns)
+    cleaned_df = read_clean_write_data(IQ_file, column_names, removal_columns, dummy_columns, New_file)
 
     # Check the dataframe for any missing data or errors
     for column in cleaned_df.columns:
         print(f"\nColumn: {column}")
-        print(df_with_dummies[column].unique()) 
+        print(cleaned_df[column].unique()) 
     
 
     

@@ -1,4 +1,4 @@
-#!/home/paulgering/Documents/PhD/multimodal_data/LEGOv2/legoV/bin/python3
+#!/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/legoV/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

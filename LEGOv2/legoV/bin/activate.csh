@@ -9,17 +9,17 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV /home/paulgering/Documents/PhD/multimodal_data/LEGOv2/legoV
+setenv VIRTUAL_ENV "/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/legoV"
 
 set _OLD_VIRTUAL_PATH="$PATH"
-setenv PATH "$VIRTUAL_ENV/"bin":$PATH"
+setenv PATH "$VIRTUAL_ENV/bin:$PATH"
 
 
 set _OLD_VIRTUAL_PROMPT="$prompt"
 
 if (! "$?VIRTUAL_ENV_DISABLE_PROMPT") then
-    set prompt = '(legoV) '"$prompt"
-    setenv VIRTUAL_ENV_PROMPT '(legoV) '
+    set prompt = "(legoV) $prompt"
+    setenv VIRTUAL_ENV_PROMPT "(legoV) "
 endif
 
 alias pydoc python -m pydoc
