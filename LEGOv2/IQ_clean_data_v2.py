@@ -5,11 +5,11 @@ Loading and Cleaning LEGO Database
 
 # Imports
 import pandas as pd
-from pathlib import Path
 import re
 import csv
-from collections import defaultdict
 import json
+from pathlib import Path
+from analyse_sem_pas import SemParse
 
 # Functions
 def get_headers(txt_file, columns_to_add):
@@ -38,80 +38,7 @@ def get_headers(txt_file, columns_to_add):
         column_names.append(columns)
     return column_names
 
-def drop_shifted_rows(data, columns):
-    """
-    Reading the csv resulted in a few rows recording data in the wrong cells, 
-    due to the reliance on a delimiter. This function removes the rows with
-    these problems, but it doesn't remove all the data from a single recording
-    """
-
-    for column in columns:
-        numerical_rows = data[data[column].apply(lambda x: str(x).replace('.', '', 1).isdigit())]
-        data = data.drop(numerical_rows.index)
-    return data
-
-def rename_cat(data, column, replacements):
-    """
-    Function to rename the categorical variables in a column
-    """
-
-    data[column] = data[column].replace(replacements)
-
-    return data
-
-def increment_triple_nested_count(nested_dict, key1, key2, key3):
-    """Increments the count in a nested dictionary. Creates keys if needed."""
-
-    if key1 not in nested_dict:
-        nested_dict[key1] = defaultdict(lambda: defaultdict(int))
-    if key2 not in nested_dict[key1]:
-        nested_dict[key1][key2] = defaultdict(int)
-
-    nested_dict[key1][key2][key3] += 1
-
-def count_entities(data_list):
-    """Counts the occurrences of entities within square brackets."""
-    nested_counts = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-
-    for item in data_list:
-        if isinstance(item, str):
-            parts = re.split(r"\)\s*", item)  # Split by ) followed by whitespace
-
-            for i, part in enumerate(parts):
-                if "[" in part: # Only process parts with brackets
-                    match = re.search(r"(\w+)\s*\[", part)  # Find token before bracket
-                    if match:
-                        token = match.group(1)
-                        bracket_matches = re.findall(r"\[([^\]]+)\]", part)
-                        if bracket_matches:
-                            key2 = bracket_matches[0]
-                            for j in range(1, len(bracket_matches)):
-                                key3 = bracket_matches[j]
-                                increment_triple_nested_count(nested_counts, token, key2, key3)
-                    elif i > 0: # If no match but it's not the first part, it's a standalone token
-                        standalone_token = part.split()[0] # Get the first word
-                        bracket_matches = re.findall(r"\[([^\]]+)\]", part)
-                        if bracket_matches:
-                            key2 = bracket_matches[0]
-                            for k in range(1, len(bracket_matches)):
-                                key3 = bracket_matches[k]
-                                increment_triple_nested_count(nested_counts, standalone_token, key2, key3)
-    return dict(nested_counts)
-
-def analyse_data(data, specific_column):
-    if specific_column == "SemanticParse":
-        sempar = data[specific_column].tolist()
-        dict_tokens = count_entities(sempar)
-        with open('semantic_parse.txt', 'w') as file:
-            file.write(json.dumps(dict_tokens, indent=3, sort_keys=False))
-        breakpoint()
-    else:
-        # Check the dataframe for any missing data or errors
-        for column in cleaned_df.columns:
-            print(f"\nColumn: {column}")
-            print(cleaned_df[column].unique()) 
-
-def read_clean_write_data(data, column_names, removal_columns, dummy_columns, new_name):
+def read_clean_write_data(data, column_names, new_name):
     """
     Function to read and clean the data from Schmitt et al. (2011)
     """
@@ -123,19 +50,35 @@ def read_clean_write_data(data, column_names, removal_columns, dummy_columns, ne
         except csv.Error:
             delimiter = ';' 
             print(f"Default delimiter used: {delimiter}")
+    
     df = pd.read_csv(data, encoding='latin1', header=None, delimiter=delimiter)
+    
     df.columns = column_names
+    
     replace_ASR = {'no input': 'timeout', 'no match': 'reject', 'complete': 'success'}
-    replace_modality = {'voice': 'speech'}    
-    df_replace = rename_cat(df, "ASRRecognitionStatus", replace_ASR)
-    df_replace = rename_cat(df, "Modality", replace_modality)
-    #df = drop_shifted_rows(df, columns = ["LoopName", "ExMo"])
-    #null_values = ["", "nan","NA", "null", "None", "\\N"]
-    #df = df.replace(null_values, pd.NA, regex=False)
-    #df = df.dropna(subset=["IQAverage"])
-    #df_dropped = df.drop(removal_columns, axis=1)
-    #df_dummy = pd.get_dummies(data=df_dropped, columns=dummy_columns)
-    df_replace.to_csv(new_name, index = False, header = True) 
+    replace_modality = {'voice': 'speech'}   
+
+    df["ASRRecognitionStatus"] = df["ASRRecognitionStatus"].replace(replace_ASR)
+    df["Modality"] = df["Modality"].replace(replace_modality)
+    df.to_csv(new_name, index = False, header = True) 
+
+    sem_parser = SemParse()
+    entity_counts = [sem_parser.count_entities(entry) for entry in df["SemanticParse"].dropna().tolist()]
+    with open('entity_counts.txt', 'w') as file:
+        file.write(json.dumps(entity_counts, indent=3, sort_keys=False)) 
+
+
+    first_keys = []
+    for dictionary in entity_counts:
+        if dictionary: # Check if the dictionary is not empty
+            first_key = list(dictionary.keys())[0]
+            first_keys.append(first_key)
+        else: # if it is empty append an empty string or something else to keep the same length
+            first_keys.append("") # or first_keys.append(None) or anything that you want
+    unique_first_keys = list(set(first_keys))
+    print(unique_first_keys)
+    breakpoint()
+
     return df
 
 # Code
@@ -145,13 +88,6 @@ if __name__ == "__main__":
     New_file = base_path / "csv/interactions_with_headers.csv"
     Read_me = base_path.parent / "readme.txt"    
     additional_col = ["FileCode", "WavFile", "EmotionState", "IQ1", "IQ2", "IQ3", "IQAverage"]
-    removal_columns = ['Prompt', 'Utterance', 'ASRRecognitionStatus', 'Modality', 'SemanticParse', 'Activity','SystemDialogueAct', 'UserDialogueAct', 'WavFile', 'EmotionState']
-    dummy_columns = ["ExMo", "ActivityType", "RoleName", "LoopName"]
 
     column_names = get_headers(Read_me, additional_col)
-    cleaned_df = read_clean_write_data(IQ_file, column_names, removal_columns, dummy_columns, New_file)
-
-    analyse_data(cleaned_df, "SemanticParse")
-    
-
-    
+    cleaned_df = read_clean_write_data(IQ_file, column_names, New_file)

@@ -1,411 +1,311 @@
 {
    "PlaceInformation": {
-      "SinglePlace": {
-         "stop_name": 808,
-         "covered_place": 723,
-         "registered_stop": 296,
-         "stop_part": 289,
-         "covered_neighborhood": 254,
-         "monument": 46,
-         "uncovered_place": 85,
-         "uncovered_stop": 9,
-         "ambiguous_covered_place": 133,
-         "ambiguous_covered_part": 135,
-         "uncovered_neighborhood": 46,
-         "ambiguous_uncovered_part": 24,
-         "vague_place": 5
-      },
-      "2_ArrivalPlace": {
-         "stop_name": 69,
-         "covered_place": 63,
-         "covered_neighborhood": 24,
-         "uncovered_place": 6,
-         "uncovered_neighborhood": 3,
-         "ambiguous_covered_place": 16,
-         "ambiguous_covered_part": 16,
-         "monument": 7,
-         "registered_stop": 16,
-         "stop_part": 15,
-         "vague_place": 1,
-         "ambiguous_uncovered_part": 2,
-         "uncovered_stop": 1
-      },
-      "1_DeparturePlace": {
-         "stop_name": 97,
-         "covered_place": 87,
-         "covered_neighborhood": 47,
-         "ambiguous_covered_place": 20,
-         "ambiguous_covered_part": 21,
-         "registered_stop": 17,
-         "stop_part": 16,
-         "uncovered_place": 10,
-         "uncovered_neighborhood": 8,
-         "uncovered_stop": 2,
-         "monument": 3
-      },
-      "2_DeparturePlace": {
-         "stop_name": 44,
-         "covered_place": 43,
-         "registered_stop": 16,
-         "stop_part": 15,
-         "ambiguous_covered_place": 11,
-         "ambiguous_covered_part": 11,
-         "covered_neighborhood": 12,
-         "vague_place": 1,
-         "monument": 4,
-         "uncovered_place": 1,
-         "uncovered_neighborhood": 1
-      },
-      "1_SinglePlace": {
-         "stop_name": 458,
-         "covered_place": 430,
-         "registered_stop": 190,
-         "stop_part": 183,
-         "monument": 39,
-         "ambiguous_covered_place": 65,
-         "ambiguous_covered_part": 68,
-         "covered_neighborhood": 137,
-         "uncovered_place": 28,
-         "uncovered_neighborhood": 18,
-         "uncovered_stop": 6,
-         "ambiguous_uncovered_part": 3,
-         "vague_place": 4
-      },
-      "3_ArrivalPlace": {
-         "stop_name": 24,
-         "covered_place": 18,
-         "covered_neighborhood": 7,
-         "ambiguous_covered_place": 3,
-         "ambiguous_covered_part": 3,
-         "registered_stop": 3,
-         "stop_part": 3,
-         "monument": 5,
-         "uncovered_place": 6,
-         "uncovered_neighborhood": 4,
-         "ambiguous_uncovered_part": 2
-      }
+      "SinglePlace": 808,
+      "stop_name": 1500,
+      "covered_place": 1364,
+      "registered_stop": 538,
+      "stop_part": 521,
+      "covered_neighborhood": 481,
+      "2_ArrivalPlace": 69,
+      "monument": 104,
+      "1_DeparturePlace": 97,
+      "uncovered_place": 136,
+      "uncovered_stop": 18,
+      "ambiguous_covered_place": 248,
+      "ambiguous_covered_part": 254,
+      "uncovered_neighborhood": 80,
+      "ambiguous_uncovered_part": 31,
+      "vague_place": 11,
+      "2_DeparturePlace": 44,
+      "1_SinglePlace": 458,
+      "3_ArrivalPlace": 24
    },
    "[SinglePlace]": {
-      "SinglePlace": {
-         "stop_name": 72,
-         "covered_place": 66,
-         "registered_stop": 44,
-         "stop_part": 42,
-         "ambiguous_covered_place": 5,
-         "ambiguous_covered_part": 5,
-         "covered_neighborhood": 13,
-         "monument": 4,
-         "vague_place": 2,
-         "uncovered_place": 6,
-         "ambiguous_uncovered_part": 4,
-         "uncovered_neighborhood": 2
-      }
-   },
-   "Generic": {
-      "Generic": {
-         "Yes": 1927,
-         "Quit": 46,
-         "StartOver": 135,
-         "No": 583,
-         "Help": 82,
-         "general_help": 82,
-         "_greeting": 20,
-         "DontKnow": 5,
-         "Repeat": 14,
-         "_courtesy": 10,
-         "_that_is": 43,
-         "FinalQuit": 3
-      },
-      "DTMF_KEY": {
-         "DTMF_ZERO": 51,
-         "DTMF_ONE": 38,
-         "DTMF_THREE": 25,
-         "DTMF_TWO": 1,
-         "DTMF_POUND": 2,
-         "DTMF_SEVEN": 1
-      }
-   },
-   "TimeInformation": {
-      "3_DateTime": {
-         "day_time": 414,
-         "date_time": 414,
-         "day_name": 9,
-         "time_range": 350,
-         "time": 280,
-         "hour": 276,
-         "time_relative": 70,
-         "now": 70,
-         "period_of_day": 35,
-         "am": 14,
-         "morning": 12,
-         "midnight": 2,
-         "noon": 4,
-         "today_relative": 20,
-         "pm": 6,
-         "night": 1
-      },
-      "3_DepartureTime": {
-         "day_time": 2,
-         "date_time": 2,
-         "time_range": 2,
-         "time_relative": 1,
-         "now": 1,
-         "time": 1,
-         "hour": 1
-      },
-      "4_DateTime": {
-         "day_time": 215,
-         "date_time": 215,
-         "time_range": 183,
-         "time": 154,
-         "hour": 153,
-         "time_relative": 29,
-         "now": 29,
-         "day_name": 3,
-         "today_relative": 13,
-         "noon": 1,
-         "period_of_day": 16,
-         "am": 6,
-         "morning": 5,
-         "midnight": 2,
-         "night": 1,
-         "pm": 2
-      },
-      "4_ArrivalTime": {
-         "day_time": 2,
-         "date_time": 2,
-         "time_range": 2,
-         "time": 2,
-         "hour": 2
-      },
-      "4_DepartureTime": {
-         "day_time": 3,
-         "date_time": 3,
-         "time_range": 3,
-         "time": 3,
-         "hour": 3
-      }
-   },
-   "LineInformation": {
-      "BusNumber": {
-         "route": 307,
-         "covered_route": 201,
-         "uncovered_route": 106
-      },
-      "0_BusNumber": {
-         "route": 163,
-         "0_covered_route": 118,
-         "0_uncovered_route": 45
-      }
-   },
-   "RequestType": {
-      "3_BusAfterThatRequest": {
-         "route": 20,
-         "covered_route": 17,
-         "uncovered_route": 3,
-         "i_want": 4
-      },
-      "4_BusAfterThatRequest": {
-         "route": 15,
-         "0_covered_route": 13,
-         "i_want": 4,
-         "0_uncovered_route": 2
-      }
-   },
-   "TO": {
-      "2_ArrivalPlace": {
-         "stop_name": 31,
-         "covered_place": 30,
-         "monument": 3,
-         "covered_neighborhood": 11,
-         "registered_stop": 7,
-         "stop_part": 7,
-         "ambiguous_covered_place": 9,
-         "ambiguous_covered_part": 9,
-         "uncovered_place": 1,
-         "uncovered_neighborhood": 1
-      },
-      "3_ArrivalPlace": {
-         "stop_name": 28,
-         "covered_place": 26,
-         "covered_neighborhood": 14,
-         "registered_stop": 6,
-         "stop_part": 6,
-         "ambiguous_covered_place": 5,
-         "ambiguous_covered_part": 5,
-         "monument": 1,
-         "uncovered_place": 2,
-         "uncovered_neighborhood": 2
-      }
-   },
-   "[period_of_day]": {
-      "period_of_day": {
-         "am": 100,
-         "pm": 48,
-         "morning": 14
-      }
-   },
-   "[3_DateTime]": {
-      "3_DateTime": {
-         "day_time": 26,
-         "date_time": 26,
-         "period_of_day": 4,
-         "morning": 3,
-         "time_range": 20,
-         "time": 20,
-         "hour": 20,
-         "day_name": 1,
-         "night": 1,
-         "today_relative": 1
-      }
-   },
-   "[time_range]": {
-      "time_range": {
-         "time": 3,
-         "hour": 2,
-         "period_of_day": 1,
-         "morning": 1
-      }
-   },
-   "[BusNumber]": {
-      "BusNumber": {
-         "route": 7,
-         "uncovered_route": 6,
-         "covered_route": 1
-      }
-   },
-   "FROM": {
-      "1_DeparturePlace": {
-         "stop_name": 10,
-         "covered_place": 8,
-         "covered_neighborhood": 4,
-         "ambiguous_covered_place": 3,
-         "ambiguous_covered_part": 3,
-         "registered_stop": 1,
-         "stop_part": 1,
-         "uncovered_place": 2,
-         "uncovered_neighborhood": 2
-      },
-      "2_DeparturePlace": {
-         "stop_name": 3,
-         "covered_place": 3,
-         "covered_neighborhood": 1,
-         "ambiguous_covered_place": 1,
-         "ambiguous_covered_part": 1,
-         "monument": 1
-      }
-   },
-   "[DTMF_KEY]": {
-      "DTMF_KEY": {
-         "DTMF_EIGHT": 1,
-         "DTMF_ZERO": 5,
-         "DTMF_SIX": 1,
-         "DTMF_TWO": 2,
-         "DTMF_FIVE": 1,
-         "DTMF_ONE": 2,
-         "DTMF_SEVEN": 2
-      }
+      "SinglePlace": 72,
+      "stop_name": 72,
+      "covered_place": 66,
+      "registered_stop": 44,
+      "stop_part": 42,
+      "ambiguous_covered_place": 5,
+      "ambiguous_covered_part": 5,
+      "covered_neighborhood": 13,
+      "monument": 4,
+      "vague_place": 2,
+      "uncovered_place": 6,
+      "ambiguous_uncovered_part": 4,
+      "uncovered_neighborhood": 2
    },
    "AT": {
-      "time_range": {
-         "time": 5,
-         "hour": 5
-      }
+      "stop_part": 36,
+      "time_range": 5,
+      "time": 5,
+      "hour": 6,
+      "ambiguous_covered_part": 2
    },
-   "[ambiguous_covered_place]": {
-      "ambiguous_covered_place": {
-         "ambiguous_covered_part": 7
-      }
+   "Generic": {
+      "Generic": 2825,
+      "Yes": 1927,
+      "Quit": 46,
+      "StartOver": 135,
+      "No": 583,
+      "DTMF_KEY": 118,
+      "DTMF_ZERO": 51,
+      "Help": 82,
+      "general_help": 82,
+      "DTMF_ONE": 38,
+      "_greeting": 20,
+      "DontKnow": 5,
+      "Repeat": 14,
+      "DTMF_THREE": 25,
+      "DTMF_TWO": 1,
+      "_courtesy": 10,
+      "DTMF_POUND": 2,
+      "_that_is": 43,
+      "FinalQuit": 3,
+      "DTMF_SEVEN": 1
    },
-   "LEAVING": {
-      "1_DeparturePlace": {
-         "stop_name": 2,
-         "uncovered_place": 1,
-         "uncovered_neighborhood": 1,
-         "covered_place": 1,
-         "registered_stop": 1,
-         "stop_part": 1
-      }
+   "TimeInformation": {
+      "3_DateTime": 414,
+      "day_time": 636,
+      "date_time": 636,
+      "day_name": 12,
+      "time_range": 540,
+      "time": 440,
+      "hour": 435,
+      "time_relative": 100,
+      "now": 100,
+      "period_of_day": 51,
+      "am": 20,
+      "morning": 17,
+      "midnight": 4,
+      "noon": 5,
+      "today_relative": 33,
+      "pm": 8,
+      "night": 2,
+      "3_DepartureTime": 2,
+      "4_DateTime": 215,
+      "4_ArrivalTime": 2,
+      "4_DepartureTime": 3
    },
-   "[Generic]": {
-      "Generic": {
-         "Yes": 25,
-         "No": 7,
-         "_courtesy": 1,
-         "_that_is": 1,
-         "_greeting": 1
-      }
+   "LineInformation": {
+      "BusNumber": 307,
+      "route": 470,
+      "covered_route": 201,
+      "uncovered_route": 106,
+      "Direction": 2,
+      "0_BusNumber": 163,
+      "0_covered_route": 118,
+      "0_uncovered_route": 45
    },
-   "[day_time]": {
-      "day_time": {
-         "date_time": 1,
-         "today_relative": 1
-      }
+   "RequestType": {
+      "3_BusBeforeThatRequest": 77,
+      "3_BusAfterThatRequest": 185,
+      "route": 35,
+      "covered_route": 17,
+      "uncovered_route": 3,
+      "i_want": 8,
+      "4_BusAfterThatRequest": 97,
+      "4_BusBeforeThatRequest": 39,
+      "0_covered_route": 13,
+      "0_uncovered_route": 2
    },
-   "NEXT": {
-      "route": {
-         "covered_route": 2,
-         "uncovered_route": 1,
-         "0_uncovered_route": 1
-      }
+   "[3_BusBeforeThatRequest]": {
+      "3_BusBeforeThatRequest": 2
    },
-   "[ambiguous_uncovered_place]": {
-      "ambiguous_uncovered_place": {
-         "ambiguous_uncovered_part": 1
-      }
+   "TO": {
+      "2_ArrivalPlace": 31,
+      "stop_name": 59,
+      "covered_place": 56,
+      "monument": 4,
+      "covered_neighborhood": 25,
+      "registered_stop": 13,
+      "stop_part": 13,
+      "ambiguous_covered_place": 14,
+      "ambiguous_covered_part": 14,
+      "uncovered_place": 3,
+      "uncovered_neighborhood": 3,
+      "3_ArrivalPlace": 28
    },
-   "THE": {
-      "period_of_day": {
-         "morning": 4
-      },
-      "BusNumber": {
-         "route": 2,
-         "uncovered_route": 1,
-         "covered_route": 1
-      }
+   "[period_of_day]": {
+      "period_of_day": 162,
+      "am": 100,
+      "pm": 48,
+      "morning": 14
+   },
+   "AND": {
+      "stop_part": 159,
+      "ambiguous_covered_part": 9,
+      "ambiguous_uncovered_part": 1
+   },
+   "Disambiguation": {
+      "DisambiguateArrival": 82,
+      "DisambiguateDeparture": 37
+   },
+   "[3_DateTime]": {
+      "3_DateTime": 26,
+      "day_time": 26,
+      "date_time": 26,
+      "period_of_day": 4,
+      "morning": 3,
+      "time_range": 20,
+      "time": 20,
+      "hour": 20,
+      "day_name": 1,
+      "night": 1,
+      "today_relative": 1
+   },
+   "[time_range]": {
+      "time_range": 3,
+      "time": 3,
+      "hour": 2,
+      "period_of_day": 1,
+      "morning": 1
+   },
+   "[BusNumber]": {
+      "BusNumber": 7,
+      "route": 7,
+      "uncovered_route": 6,
+      "covered_route": 1
    },
    "IN": {
-      "ambiguous_covered_place": {
-         "ambiguous_covered_part": 2
-      },
-      "ambiguous_uncovered_place": {
-         "ambiguous_uncovered_part": 1
-      }
+      "covered_neighborhood": 2,
+      "ambiguous_covered_place": 2,
+      "ambiguous_covered_part": 2,
+      "ambiguous_uncovered_place": 1,
+      "ambiguous_uncovered_part": 1
+   },
+   "FROM": {
+      "1_DeparturePlace": 10,
+      "stop_name": 13,
+      "covered_place": 11,
+      "covered_neighborhood": 5,
+      "ambiguous_covered_place": 4,
+      "ambiguous_covered_part": 4,
+      "registered_stop": 1,
+      "stop_part": 1,
+      "uncovered_place": 2,
+      "uncovered_neighborhood": 2,
+      "2_DeparturePlace": 3,
+      "monument": 1
+   },
+   "[DisambiguateArrival]": {
+      "DisambiguateArrival": 2
+   },
+   "[DTMF_KEY]": {
+      "DTMF_KEY": 14,
+      "DTMF_EIGHT": 1,
+      "DTMF_ZERO": 5,
+      "DTMF_SIX": 1,
+      "DTMF_TWO": 2,
+      "DTMF_FIVE": 1,
+      "DTMF_ONE": 2,
+      "DTMF_SEVEN": 2
+   },
+   "[minute]": {
+      "minute": 133
+   },
+   "[covered_neighborhood]": {
+      "covered_neighborhood": 10
+   },
+   "[ambiguous_covered_place]": {
+      "ambiguous_covered_place": 7,
+      "ambiguous_covered_part": 7
+   },
+   "LEAVING": {
+      "1_DeparturePlace": 2,
+      "stop_name": 2,
+      "uncovered_place": 1,
+      "uncovered_neighborhood": 1,
+      "covered_place": 1,
+      "registered_stop": 1,
+      "stop_part": 1
+   },
+   "[3_BusAfterThatRequest]": {
+      "3_BusAfterThatRequest": 5
+   },
+   "OPPOSITE": {
+      "stop_part": 2
+   },
+   "[Generic]": {
+      "Generic": 34,
+      "Yes": 25,
+      "No": 7,
+      "_courtesy": 1,
+      "_that_is": 1,
+      "_greeting": 1
+   },
+   "[day_time]": {
+      "day_time": 1,
+      "date_time": 1,
+      "today_relative": 1
+   },
+   "NEXT": {
+      "route": 4,
+      "covered_route": 2,
+      "uncovered_route": 1,
+      "0_uncovered_route": 1
+   },
+   "[uncovered_neighborhood]": {
+      "uncovered_neighborhood": 5
+   },
+   "[ambiguous_uncovered_place]": {
+      "ambiguous_uncovered_place": 1,
+      "ambiguous_uncovered_part": 1
+   },
+   "THE": {
+      "period_of_day": 4,
+      "morning": 4,
+      "BusNumber": 2,
+      "route": 2,
+      "uncovered_route": 1,
+      "covered_route": 1
+   },
+   "[AnyStop]": {
+      "AnyStop": 1
    },
    "[0_BusNumber]": {
-      "0_BusNumber": {
-         "route": 2,
-         "0_covered_route": 1,
-         "0_uncovered_route": 1
-      }
+      "0_BusNumber": 2,
+      "route": 2,
+      "0_covered_route": 1,
+      "0_uncovered_route": 1
    },
    "[4_DateTime]": {
-      "4_DateTime": {
-         "day_time": 8,
-         "date_time": 8,
-         "period_of_day": 4,
-         "am": 1,
-         "morning": 3,
-         "today_relative": 1,
-         "time_range": 3,
-         "time": 3,
-         "hour": 3
-      }
+      "4_DateTime": 8,
+      "day_time": 8,
+      "date_time": 8,
+      "period_of_day": 4,
+      "am": 1,
+      "morning": 3,
+      "today_relative": 1,
+      "time_range": 3,
+      "time": 3,
+      "hour": 3
    },
    "[1_SinglePlace]": {
-      "1_SinglePlace": {
-         "stop_name": 45,
-         "covered_place": 43,
-         "ambiguous_covered_place": 5,
-         "ambiguous_covered_part": 5,
-         "covered_neighborhood": 11,
-         "registered_stop": 25,
-         "stop_part": 21,
-         "vague_place": 4,
-         "monument": 2,
-         "uncovered_place": 2,
-         "ambiguous_uncovered_part": 1,
-         "uncovered_neighborhood": 1
-      }
+      "1_SinglePlace": 45,
+      "stop_name": 45,
+      "covered_place": 43,
+      "ambiguous_covered_place": 5,
+      "ambiguous_covered_part": 5,
+      "covered_neighborhood": 11,
+      "registered_stop": 25,
+      "stop_part": 21,
+      "vague_place": 4,
+      "monument": 2,
+      "uncovered_place": 2,
+      "ambiguous_uncovered_part": 1,
+      "uncovered_neighborhood": 1
+   },
+   "[today_relative]": {
+      "today_relative": 1
+   },
+   "[day_name]": {
+      "day_name": 1
+   },
+   "[4_BusAfterThatRequest]": {
+      "4_BusAfterThatRequest": 2
+   },
+   "[4_BusBeforeThatRequest]": {
+      "4_BusBeforeThatRequest": 1
    }
 }
