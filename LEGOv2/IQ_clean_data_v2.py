@@ -52,7 +52,7 @@ def get_headers(txt_file, columns_to_add):
 
 
 
-def read_clean_write_data(data, column_names, new_name):
+def read_clean_write_data(data, column_names, new_name, dummy_columns, drop_columns):
     """
     Function to read and clean the data from Schmitt et al. (2011)
 
@@ -82,6 +82,11 @@ def read_clean_write_data(data, column_names, new_name):
     df["ASRRecognitionStatus"] = df["ASRRecognitionStatus"].replace(replace_ASR)
     df["Modality"] = df["Modality"].replace(replace_modality)
      
+    # Drop Rows with null values
+    null_values = ["", "nan","NA", "null", "None", "\\N"]
+    df = df.replace(null_values, pd.NA, regex=False)
+    df = df.dropna(subset=["IQAverage"])
+    
     # Extract the keys from the SemanticParse column and add to a dictionary
     sem_parser = SemParse()
     entity_counts = [sem_parser.count_entities(entry) for entry in df["SemanticParse"].dropna().tolist()]
@@ -99,23 +104,37 @@ def read_clean_write_data(data, column_names, new_name):
     unique_first_keys = list(set(first_keys))
 
     # Add Boolean Categories relating to the top-level keys to dataframe
+    df.loc[df['SemanticParse'] == "Semantic no match", 'SemanticParse'] = "semantic_no_match"
+
     for key in first_keys:
         if key:
             df[key + '_present'] = df['SemanticParse'].str.contains(r'\b' + re.escape(key) + r'\b', case=False, regex=True)
         else: 
             continue
 
-    df.to_csv(new_name, index = False, header = True)
-
-    return df
+    # Drop unnecessary columns
+    df_dropped = df.drop(drop_columns, axis=1)
+    
+    # Convert Categorical Variables to Dummy Variables
+    df_dummy = pd.get_dummies(data=df_dropped, columns=dummy_columns)
+    
+    df_dummy.to_csv(new_name, index = False, header = True)
+    return df_dummy
 
 # Code
 if __name__ == "__main__":
     base_path = Path("/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/corpus")
     IQ_file = base_path / "csv/interactions.csv"
-    New_file = base_path / "csv/interactions_with_headers.csv"
+    New_file = base_path / "csv/clean_interactions.csv"
     Read_me = base_path.parent / "readme.txt"    
-    additional_col = ["FileCode", "WavFile", "EmotionState", "IQ1", "IQ2", "IQ3", "IQAverage"]
+    add_col = ["FileCode", "WavFile", "EmotionState", "IQ1", "IQ2", "IQ3", "IQAverage"]
+    dummy_col = ["ASRRecognitionStatus", "ExMo", "Modality", "Activity", "ActivityType", "RoleName", "LoopName", "SystemDialogueAct", "UserDialogueAct", "EmotionState"]
+    drop_col = ['Prompt', 'Utterance', 'SemanticParse', 'WavFile']
 
-    column_names = get_headers(Read_me, additional_col)
-    cleaned_df = read_clean_write_data(IQ_file, column_names, New_file)
+    column_names = get_headers(Read_me, add_col)
+    cleaned_df = read_clean_write_data(IQ_file, column_names, New_file, dummy_col, drop_col)
+
+    # Check the dataframe for any missing data or errors
+    for column in cleaned_df.columns:
+        print(f"\nColumn: {column}")
+        print(cleaned_df[column].unique()) 

@@ -52,7 +52,7 @@ class SemParse:
     def count_entities(self, data_string):
         """Parses a formatted string and constructs nested dictionaries with counts."""
         if data_string.strip().lower() == "semantic no match":
-            return {}
+            data_string = "semantic_no_match"
         tokens = re.findall(r"\(|\)|\w+\[.*?\]|\w+", data_string)
         _, parsed_dict = self._parse_recursive(tokens, 0, defaultdict(lambda: defaultdict(int)))
         return parsed_dict
