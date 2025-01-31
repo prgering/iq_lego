@@ -60,7 +60,7 @@ def read_clean_write_data(data, column_names, new_name):
 
     df["ASRRecognitionStatus"] = df["ASRRecognitionStatus"].replace(replace_ASR)
     df["Modality"] = df["Modality"].replace(replace_modality)
-    df.to_csv(new_name, index = False, header = True) 
+     
 
     sem_parser = SemParse()
     entity_counts = [sem_parser.count_entities(entry) for entry in df["SemanticParse"].dropna().tolist()]
@@ -76,8 +76,13 @@ def read_clean_write_data(data, column_names, new_name):
         else: # if it is empty append an empty string or something else to keep the same length
             first_keys.append("") # or first_keys.append(None) or anything that you want
     unique_first_keys = list(set(first_keys))
-    print(unique_first_keys)
-    breakpoint()
+    for key in first_keys:
+        if key: #check if the key is not an empty string
+            df[key + '_present'] = df['SemanticParse'].str.contains(r'\b' + re.escape(key) + r'\b', case=False, regex=True)
+        else: 
+            continue
+
+    df.to_csv(new_name, index = False, header = True)
 
     return df
 
