@@ -13,9 +13,9 @@ def train_opt_split(df):
     return train_test_split(x, y, random_state=0, train_size = .60)
 
 
-def train_svm(X_train, y_train):
+def train_svm(X, y):
     clf = svm.SVC(kernel='linear', C = 1.0).fit(X_train, y_train)
-    scores = cross_val_score(clf, X, y, cv=10, scoring=recall_score(average='weighted'))
+    scores = cross_val_score(clf, X, y, cv=10, scoring='recall_weighted')
     print(scores)
 
     
