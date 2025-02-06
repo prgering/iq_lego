@@ -52,7 +52,7 @@ def read_data(data):
     CSV file is read into Python using delimiter that is identified
     """
     
-        with open(data, 'r', encoding='latin1') as file:
+    with open(data, 'r', encoding='latin1') as file:
         try:
             dialect = csv.Sniffer().sniff(file.read(1024))
             delimiter = dialect.delimiter
@@ -125,6 +125,9 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
     df_dummy = pd.get_dummies(data=df_dropped, columns=dummy_columns)
 
     return df_dummy
+
+
+
 
 
 # Code
