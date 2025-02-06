@@ -100,7 +100,6 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
 
     df.columns = column_names
 
-    df.to_csv("/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/corpus/csv/investigate_help_requests.csv", index = False, header = True)
 
     replace_ASR = {'no input': 'timeout', 'no match': 'reject', 'complete': 'success'}
     replace_modality = {'voice': 'speech'}   
@@ -111,7 +110,10 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
     null_values = ["", "nan","NA", "null", "None", "\\N"]
     df = df.replace(null_values, pd.NA, regex=False)
     df = df.dropna(subset=["IQAverage"])
+    df = df.drop(df.loc[df['SystemDialogueAct'].isin(["SDA_GREETING", "SDA_OFFERHELP"])].index)
     
+    df.to_csv("/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/corpus/csv/investigate_help_requests.csv", index = False, header = True)
+
     sem_keys = extract_keys_sem_parse(df)
 
     df.loc[df['SemanticParse'] == "Semantic no match", 'SemanticParse'] = "semantic_no_match"
