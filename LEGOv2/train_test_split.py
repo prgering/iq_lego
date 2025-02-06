@@ -6,7 +6,7 @@ from sklearn import tree
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 from sklearn.model_selection import cross_val_score
-from smo_optimizer import SVM
+from svm_smo.src.smo_optimizer import SVM
 
 def train_opt_split(df):
     x = df.drop("IQAverage", axis=1)
@@ -15,9 +15,9 @@ def train_opt_split(df):
 
 
 def train_svm(X, y):
-    #clf = svm.SVC(kernel='linear', C = 1.0).fit(X_train, y_train)
-    clf = SVM(kernel_type='linear').fit(X, y)
-    scores = cross_val_score(clf, X, y, cv=10, scoring='recall_weighted')
+    clf = svm.SVC(kernel='linear', C = 1.0).fit(X_train, y_train)
+    #clf = SVM(kernel_type='linear').fit(X, y)
+    scores = cross_val_score(clf, X, y, cv=10, scoring='recall_macro')
     print(scores)
 
     
