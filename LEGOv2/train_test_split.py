@@ -15,8 +15,8 @@ def train_opt_split(df):
 
 
 def train_svm(X, y):
-    clf = svm.SVC(kernel='linear', C = 1.0).fit(X_train, y_train)
-    #clf = SVM(kernel_type='linear').fit(X, y)
+    #clf = svm.SVC(kernel='linear', C = 1.0).fit(X_train, y_train)
+    clf = SVM(kernel_type='linear').fit(X, y)
     scores = cross_val_score(clf, X, y, cv=10, scoring='recall_macro')
     print(scores)
 
@@ -29,5 +29,5 @@ if __name__ == "__main__":
 
     X_train, X_opt, y_train, y_opt = train_opt_split(data)
 
-    train_svm(X_train, y_train)
+    train_svm(X_train.to_numpy(), y_train.to_numpy())
 
