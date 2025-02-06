@@ -99,7 +99,9 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
     """
 
     df.columns = column_names
-    
+
+    df.to_csv("/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/corpus/csv/investigate_help_requests.csv", index = False, header = True)
+
     replace_ASR = {'no input': 'timeout', 'no match': 'reject', 'complete': 'success'}
     replace_modality = {'voice': 'speech'}   
 
@@ -116,11 +118,13 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
 
     for key in sem_keys:
         if key:
-            df[key + '_present'] = df['SemanticParse'].str.contains(r'\b' + re.escape(key) + r'\b', case=False, regex=True)
+            df[key + '_present'] = df['SemanticParse'].str.contains(r'\b' + re.escape(key) + r'\b', case=False, regex=True).replace(pd.NA, False)
         else: 
             continue
 
     df_dropped = df.drop(drop_columns, axis=1)
+    df = df.replace(null_values, pd.NA, regex=False)
+
     
     df_dummy = pd.get_dummies(data=df_dropped, columns=dummy_columns)
 
@@ -138,7 +142,7 @@ if __name__ == "__main__":
     read_me = base_path.parent / "readme.txt"    
     add_col = ["FileCode", "WavFile", "EmotionState", "IQ1", "IQ2", "IQ3", "IQAverage"]
     dummy_col = ["ASRRecognitionStatus", "ExMo", "Modality", "Activity", "ActivityType", "RoleName", "LoopName", "SystemDialogueAct", "UserDialogueAct", "EmotionState"]
-    drop_col = ['Prompt', 'Utterance', 'SemanticParse', 'WavFile']
+    drop_col = ['FileCode', 'Prompt', 'Utterance', 'SemanticParse', 'WavFile', "IQ1", "IQ2", "IQ3", "HelpRequest?", "SumHelpRequests", "ContextSumHelpRequest", "PercentHelpRequest"]
 
     column_names = get_headers(read_me, add_col)
     uncleaned_df = read_data(IQ_file)
