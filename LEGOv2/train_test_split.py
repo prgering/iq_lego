@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from sklearn import tree
 from sklearn.model_selection import train_test_split
-from sklearn import svm
 from sklearn.model_selection import KFold
 from svm_smo.src.smo_optimizer import SVM
+from sklearn.metrics import recall_score
+
 
 def train_opt_split(df):
     x = df.drop("IQAverage", axis=1)
@@ -21,7 +22,7 @@ def train_svm(X, y):
         X_train, X_val = X[train_index], X[val_index]
         y_train, y_val = y[train_index], y[val_index]
         clf = SVM(kernel_type='linear').fit(X_train, y_train)
-        y_pred = model.predict(X_val)
+        y_pred = clf.predict(X_val)
         macro_recall = recall_score(y_val, y_pred, average='macro')
         macro_recall_scores.append(macro_recall)
         print(f"Fold {i} Macro-Recall: {macro_recall}")
