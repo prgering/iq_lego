@@ -52,7 +52,11 @@ def train_svm(X, y):
         clf = SVM(kernel_type='linear')
         clf.fit(X_train, y_train)
         y_pred, _ = clf.predict(X_val)
-        macro_recall = recall_score(y_val, y_pred, average='macro')
+        try:
+            macro_recall = recall_score(y_val, np.array(y_pred), average='macro')
+        except ValueError:
+            print(f"Fold {i}: ValueError in recall_score.  Likely missing classes in y_pred.")
+            macro_recall = np.nan
         macro_recall_scores.append(macro_recall)
         print(f"Fold {i} Macro-Recall: {macro_recall}")
 
