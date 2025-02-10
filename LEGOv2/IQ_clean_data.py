@@ -85,7 +85,15 @@ def extract_keys_sem_parse(data):
 
     return unique_first_keys 
 
-    
+def extract_word_embeddings(data, column):
+    embeddings = data[column].apply(model.encode).to_list()
+
+    embeddings_array = np.array(embeddings)
+
+    embeddings_df = pd.DataFrame(embeddings_array, index=data.index)
+
+    return embeddings_df
+
 
 def clean_data(df, column_names, dummy_columns, drop_columns):
     """
@@ -112,8 +120,6 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
     df = df.dropna(subset=["IQAverage"])
     df = df.drop(df.loc[df['SystemDialogueAct'].isin(["SDA_GREETING", "SDA_OFFERHELP"])].index)
     
-    df.to_csv("/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/corpus/csv/investigate_help_requests.csv", index = False, header = True)
-
     sem_keys = extract_keys_sem_parse(df)
 
     df.loc[df['SemanticParse'] == "Semantic no match", 'SemanticParse'] = "semantic_no_match"
@@ -123,6 +129,10 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
             df[key + '_present'] = df['SemanticParse'].str.contains(r'\b' + re.escape(key) + r'\b', case=False, regex=True).replace(pd.NA, False)
         else: 
             continue
+    
+    embed_prompt = extract_word_embeddings(df, "Prompt")
+    embed_utterance = extract_word_embeddings(df, "Utterance")
+    breakpoint()
 
     df_dropped = df.drop(drop_columns, axis=1)
     df = df.replace(null_values, pd.NA, regex=False)
@@ -140,11 +150,11 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
 if __name__ == "__main__":
     base_path = Path("/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/corpus")
     IQ_file = base_path / "csv/interactions.csv"
-    new_file = base_path / "csv/clean_interactions.csv"
+    new_file = base_path / "csv/clean_interactions_lstm.csv"
     read_me = base_path.parent / "readme.txt"    
     add_col = ["FileCode", "WavFile", "EmotionState", "IQ1", "IQ2", "IQ3", "IQAverage"]
     dummy_col = ["ASRRecognitionStatus", "ExMo", "Modality", "Activity", "ActivityType", "RoleName", "LoopName", "SystemDialogueAct", "UserDialogueAct", "EmotionState"]
-    drop_col = ['FileCode', 'Prompt', 'Utterance', 'SemanticParse', 'WavFile', "IQ1", "IQ2", "IQ3", "HelpRequest?", "SumHelpRequests", "ContextSumHelpRequest", "PercentHelpRequest"]
+    drop_col = ['Prompt', 'Utterance', 'SemanticParse', 'WavFile', "IQ1", "IQ2", "IQ3", "HelpRequest?", "SumHelpRequests", "ContextSumHelpRequest", "PercentHelpRequest"]
 
     column_names = get_headers(read_me, add_col)
     uncleaned_df = read_data(IQ_file)
