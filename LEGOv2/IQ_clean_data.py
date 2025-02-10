@@ -11,6 +11,8 @@ import csv
 import json
 from pathlib import Path
 from analyse_sem_pas import SemParse
+from sentence_transformers import SentenceTransformer
+
 
 
 
@@ -86,6 +88,8 @@ def extract_keys_sem_parse(data):
     return unique_first_keys 
 
 def extract_word_embeddings(data, column):
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    
     embeddings = data[column].apply(model.encode).to_list()
 
     embeddings_array = np.array(embeddings)
@@ -140,8 +144,6 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
     df_dummy = pd.get_dummies(data=df_dropped, columns=dummy_columns)
 
     return df_dummy
-
-
 
 
 
