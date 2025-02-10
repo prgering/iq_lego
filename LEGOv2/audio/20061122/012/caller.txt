@@ -1,7 +1,0 @@
-Gender: female
-Age: youth
-Familiarity: outside user
-Intent: serious
-Language: regional American
-Quality: clear
-Other identification: 
