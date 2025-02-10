@@ -1,11 +1,9 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
-from sklearn import tree
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import KFold
-from svm_smo.src.smo_optimizer import SVM
+from sklearn.model_selection import StratifiedKFold
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import recall_score
 
 
@@ -21,7 +19,7 @@ def feature_dict(df):
         feature_types[key] = []
     
     feature_types["ASR"].append(df.filter(regex='ASR|TimeOut|Barge|UTD|ExMo|WPUT|Modality').columns)
-    feature_types["DM"].append(df.filter(regex='WPST|DD|RoleIndex|Prompt|Exchange|Turns|SystemQuestions|Activity|Rolename|LoopName').columns)
+    feature_types["DM"].append(df.filter(regex='WPST|DD|RoleIndex|^Prompt$|Exchange|Turns|SystemQuestions|Activity|RoleName|LoopName|RePrompt').columns)
     feature_types["SLU"].append(df.filter(regex='present').columns)
     feature_types["DAcT"].append(df.filter(regex='DialogueAct').columns)
     feature_types["EMO"].append(df.filter(regex='EmotionState').columns)
@@ -41,27 +39,34 @@ def split_features(df, feature_types):
 
     return dfs, df_AUTO, df_AUTOEMO
 
-
 def train_svm(X, y):
     macro_recall_scores = []
     k = 10
-    kf = KFold(n_splits=k, shuffle=True,random_state=42)
-    for i, (train_index, val_index) in enumerate(kf.split(X)):
-        X_train, X_val = X[train_index], X[val_index]
-        y_train, y_val = y[train_index], y[val_index]
-        clf = SVM(kernel_type='linear')
-        clf.fit(X_train, y_train)
-        y_pred, _ = clf.predict(X_val)
+    kf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
+    scaler = StandardScaler()
+
+    for i, (train_index, val_index) in enumerate(kf.split(X, y)): # Note: y passed to split
+        X_train, X_val = X.iloc[train_index], X.iloc[val_index] # Use .iloc for indexing
+        y_train, y_val = y.iloc[train_index], y.iloc[val_index]
+
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_val_scaled = scaler.transform(X_val)
+
+        clf = SVC(kernel='linear')
+        clf.fit(X_train_scaled, y_train)
+        y_pred = clf.predict(X_val_scaled)
+
         try:
-            macro_recall = recall_score(y_val, np.array(y_pred), average='macro')
+            macro_recall = recall_score(y_val, y_pred, average='macro')
         except ValueError:
-            print(f"Fold {i}: ValueError in recall_score.  Likely missing classes in y_pred.")
+            print(f"Fold {i}: ValueError in recall_score.")
             macro_recall = np.nan
         macro_recall_scores.append(macro_recall)
-        print(f"Fold {i} Macro-Recall: {macro_recall}")
+        # print(f"Fold {i} Macro-Recall: {macro_recall}")  # Print less frequently
 
     average_macro_recall = np.mean(macro_recall_scores)
     print(f"Average Macro-Recall across {k} folds: {average_macro_recall}")
+
 
     
 if __name__ == "__main__":
