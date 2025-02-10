@@ -108,7 +108,6 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
 
     df.columns = column_names
 
-
     replace_ASR = {'no input': 'timeout', 'no match': 'reject', 'complete': 'success'}
     replace_modality = {'voice': 'speech'}   
 
