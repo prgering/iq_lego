@@ -1,20 +1,19 @@
 """ 
-Loading and Cleaning LEGO Database
+Loading, Cleaning and Pre-processing the LEGO Database for classification
 
 """
 
 # Imports
 
 import pandas as pd
+import numpy as np
 import re
 import csv
 import json
+
 from pathlib import Path
 from analyse_sem_pas import SemParse
 from sentence_transformers import SentenceTransformer
-
-
-
 
 # Functions
 
@@ -47,6 +46,7 @@ def get_headers(txt_file, columns_to_add):
 
     return column_names
 
+
 def read_data(data):
     """
     Function to read LEGO data from interaction.csv
@@ -66,6 +66,7 @@ def read_data(data):
     df = pd.read_csv(data, encoding='latin1', header=None, delimiter=delimiter)
     return df
 
+
 def extract_keys_sem_parse(data):
     """
     Function to identify unique high-level keys in the semantic parse column of csv.
@@ -73,9 +74,7 @@ def extract_keys_sem_parse(data):
     """
     sem_parser = SemParse()
     entity_counts = [sem_parser.count_entities(entry) for entry in data["SemanticParse"].dropna().tolist()]
-    with open('entity_counts.txt', 'w') as file:
-        file.write(json.dumps(entity_counts, indent=3, sort_keys=False))
-    
+
     first_keys = []
     for dictionary in entity_counts:
         if dictionary:
@@ -85,16 +84,38 @@ def extract_keys_sem_parse(data):
             first_keys.append("")
     unique_first_keys = list(set(first_keys))
 
-    return unique_first_keys 
+    return unique_first_keys
+ 
 
-def extract_word_embeddings(data, column):
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+def extract_sentence_embeddings(data, column, prefix):
+    """
+    Function to extract sentence embeddings to create the Grammar, Triggered_Grammar
+    and Utterance Parameters.
     
-    embeddings = data[column].apply(model.encode).to_list()
+    """
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+
+    data[column] = data[column].astype(str)
+
+    embeddings = []
+    if prefix == "triggered_grammar":
+        for i, utterance in enumerate(data["Utterance"]):
+            if utterance and not pd.isna(utterance) and utterance != "":
+                embedding = model.encode(data["Prompt"][i])
+                embeddings.append(embedding)
+            else:
+                embedding_dimension = model.get_sentence_embedding_dimension() #Get embedding dimension
+                embeddings.append(np.zeros(embedding_dimension)) #Append 0 vector
+
+    elif prefix:
+        data[column] = data[column].fillna("")
+        embeddings = data[column].apply(model.encode).to_list()
 
     embeddings_array = np.array(embeddings)
+    embedding_dimension = embeddings_array.shape[1]
+    column_names = [f"{prefix}_{i}" for i in range(embedding_dimension)]
 
-    embeddings_df = pd.DataFrame(embeddings_array, index=data.index)
+    embeddings_df = pd.DataFrame(embeddings_array, index=data.index, columns=column_names)
 
     return embeddings_df
 
@@ -102,27 +123,36 @@ def extract_word_embeddings(data, column):
 def clean_data(df, column_names, dummy_columns, drop_columns):
     """
     The following steps are taken to clean the data:
-    1. column headers added
-    2. categorical variable labels changed if inconsistent with documentation
-    3. null values removed
     4. information from semantic parser column extracted in ML appropriate format
     5. columns not necessary for ML pipeline dropped
     6. categorical variables dummy coded
     """
 
+    # Column headers added
+
     df.columns = column_names
+
+    # Categorical variable labels changed if inconsistent with documentation
 
     replace_ASR = {'no input': 'timeout', 'no match': 'reject', 'complete': 'success'}
     replace_modality = {'voice': 'speech'}   
 
     df["ASRRecognitionStatus"] = df["ASRRecognitionStatus"].replace(replace_ASR)
     df["Modality"] = df["Modality"].replace(replace_modality)
+
+    # Null values removed
      
     null_values = ["", "nan","NA", "null", "None", "\\N"]
     df = df.replace(null_values, pd.NA, regex=False)
     df = df.dropna(subset=["IQAverage"])
+
+    # Drop First Turn of each video
+
     df = df.drop(df.loc[df['SystemDialogueAct'].isin(["SDA_GREETING", "SDA_OFFERHELP"])].index)
-    
+    df = df.reset_index(drop=True)
+
+    # Preprocessing of SemanticParse Column
+
     sem_keys = extract_keys_sem_parse(df)
 
     df.loc[df['SemanticParse'] == "Semantic no match", 'SemanticParse'] = "semantic_no_match"
@@ -133,14 +163,21 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
         else: 
             continue
     
-    embed_prompt = extract_word_embeddings(df, "Prompt")
-    embed_utterance = extract_word_embeddings(df, "Utterance")
-    breakpoint()
+    # Extract sentence embeddings
 
-    df_dropped = df.drop(drop_columns, axis=1)
+    embed_prompt = extract_sentence_embeddings(df, "Prompt", prefix= "grammar_emb")
+    embed_utterance = extract_sentence_embeddings(df, "Utterance", prefix= "utterance_emb")
+    embed_triggered_grammar = extract_sentence_embeddings(df, "Utterance", prefix="triggered_grammar")
+
+    df_with_embeddings = pd.concat([df, embed_prompt, embed_utterance, embed_triggered_grammar], axis = 1)
+    
+    # Remove columns not required for classifier
+
+    df_dropped = df_with_embeddings.drop(drop_columns, axis=1)
     df = df.replace(null_values, pd.NA, regex=False)
 
-    
+    # Dummy code categorical variables
+
     df_dummy = pd.get_dummies(data=df_dropped, columns=dummy_columns)
 
     return df_dummy
@@ -149,10 +186,11 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
 
 # Code
 if __name__ == "__main__":
-    base_path = Path("/home/paulgering/Documents/PhD/multimodal_data/iq_lego/LEGOv2/corpus")
+    base_path = Path("/home/acp23prg/fastdata/projects/iq_lego/LEGOv2/corpus")
     IQ_file = base_path / "csv/interactions.csv"
-    new_file = base_path / "csv/clean_interactions_lstm.csv"
-    read_me = base_path.parent / "readme.txt"    
+    new_file = base_path / "csv/clean_interactions.csv"
+    read_me = base_path.parent / "readme.txt" 
+       
     add_col = ["FileCode", "WavFile", "EmotionState", "IQ1", "IQ2", "IQ3", "IQAverage"]
     dummy_col = ["ASRRecognitionStatus", "ExMo", "Modality", "Activity", "ActivityType", "RoleName", "LoopName", "SystemDialogueAct", "UserDialogueAct", "EmotionState"]
     drop_col = ['Prompt', 'Utterance', 'SemanticParse', 'WavFile', "IQ1", "IQ2", "IQ3", "HelpRequest?", "SumHelpRequests", "ContextSumHelpRequest", "PercentHelpRequest"]
