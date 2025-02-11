@@ -65,10 +65,8 @@ def dim_reduce(df, n_components = 50, prefix=""):
     """
     Uses Principal Components Analysis to reduce the components of the word embedding features
     """
-    scaler = StandardScaler()
-    df_scaled = scaler.fit_transform(df) 
     pca = PCA(n_components=n_components)
-    df_reduced = pca.fit_transform(df_scaled) 
+    df_reduced = pca.fit_transform(df) 
     new_cols = [f"{prefix}_{i+1}" for i in range(n_components)] 
     df_with_heads = pd.DataFrame(df_reduced, index=df.index, columns=new_cols)
     return df_with_heads
@@ -134,23 +132,36 @@ if __name__ == "__main__":
         feature_type_dict = feature_dict(X_train_reduced)
         X_train_dict_reduced, X_train_auto_reduced, X_train_autoemo_reduced = split_features(X_train_reduced, feature_type_dict)
 
-        feature_sets = {
-            "ALL": X_train_reduced,
-            **feature_type_dict,
-            "AUTO": X_train_auto_reduced,
-            "AUTOEMO": X_train_autoemo_reduced,
-        }
+        # Train SVM on different feature sets
 
-        for name, X_train_subset in feature_sets.items():
-            print(f"Training {name} feature data with {n} embedding dimensions\n")
-            recall = train_svm(X_train_subset, y_train)
+        print(f"Training ALL feature data with {n} embedding dimensions\n")
+        recall = train_svm(X_train_reduced, y_train)
 
+        if recall > best_recall:
+            best_recall = recall
+            best_n = n
+
+        for key, dataframe in X_train_dict_reduced.items():
+            print(f"Training {key} feature data with {n} embedding dimensions\n")
+            recall = train_svm(dataframe, y_train)
             if recall > best_recall:
                 best_recall = recall
                 best_n = n
-                best_feature_set = name
+        
+        print(f"Training AUTO feature data with {n} embedding dimensions\n")
+        recall = train_svm(X_train_auto_reduced, y_train)
+        if recall > best_recall:
+            best_recall = recall
+            best_n = n
 
-    print(f"Best recall of {best_recall} was achieved by {best_n} components per embedding type using {best_feature_set} feature set")
+        print(f"Training AUTOEMO feature data with {n} embedding dimensions\n")
+        recall = train_svm(X_train_autoemo_reduced, y_train)
+        if recall > best_recall:
+            best_recall = recall
+            best_n = n
+
+    print(f"Best recall of {best_recall} was achieved by {best_n} components per embedding type")
+
 
 
 
