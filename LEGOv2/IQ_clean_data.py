@@ -1,4 +1,5 @@
 """ 
+
 Loading, Cleaning and Pre-processing the LEGO Database for classification
 
 """
@@ -89,27 +90,15 @@ def extract_keys_sem_parse(data):
 
 def extract_sentence_embeddings(data, column, prefix):
     """
-    Function to extract sentence embeddings to create the Grammar, Triggered_Grammar
-    and Utterance Parameters.
+    Function to extract sentence embeddings to create Utterance Parameters.
     
     """
     model = SentenceTransformer("all-MiniLM-L6-v2")
 
     data[column] = data[column].astype(str)
 
-    embeddings = []
-    if prefix == "triggered_grammar":
-        for i, utterance in enumerate(data["Utterance"]):
-            if utterance and not pd.isna(utterance) and utterance != "":
-                embedding = model.encode(data["Prompt"][i])
-                embeddings.append(embedding)
-            else:
-                embedding_dimension = model.get_sentence_embedding_dimension() #Get embedding dimension
-                embeddings.append(np.zeros(embedding_dimension)) #Append 0 vector
-
-    elif prefix:
-        data[column] = data[column].fillna("")
-        embeddings = data[column].apply(model.encode).to_list()
+    data[column] = data[column].fillna("")
+    embeddings = data[column].apply(model.encode).to_list()
 
     embeddings_array = np.array(embeddings)
     embedding_dimension = embeddings_array.shape[1]
@@ -163,14 +152,11 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
         else: 
             continue
     
-    # Extract sentence embeddings
+    # Extract sentence embeddings for Utterance Column
 
-    embed_prompt = extract_sentence_embeddings(df, "Prompt", prefix= "grammar_emb")
     embed_utterance = extract_sentence_embeddings(df, "Utterance", prefix= "utterance_emb")
-    embed_triggered_grammar = extract_sentence_embeddings(df, "Utterance", prefix="triggered_grammar")
+    df_with_embeddings = pd.concat([df, embed_utterance], axis = 1)
 
-    df_with_embeddings = pd.concat([df, embed_prompt, embed_utterance, embed_triggered_grammar], axis = 1)
-    
     # Remove columns not required for classifier
 
     df_dropped = df_with_embeddings.drop(drop_columns, axis=1)
@@ -190,7 +176,7 @@ if __name__ == "__main__":
     IQ_file = base_path / "csv/interactions.csv"
     new_file = base_path / "csv/clean_interactions.csv"
     read_me = base_path.parent / "readme.txt" 
-       
+
     add_col = ["FileCode", "WavFile", "EmotionState", "IQ1", "IQ2", "IQ3", "IQAverage"]
     dummy_col = ["ASRRecognitionStatus", "ExMo", "Modality", "Activity", "ActivityType", "RoleName", "LoopName", "SystemDialogueAct", "UserDialogueAct", "EmotionState"]
     drop_col = ['Prompt', 'Utterance', 'SemanticParse', 'WavFile', "IQ1", "IQ2", "IQ3", "HelpRequest?", "SumHelpRequests", "ContextSumHelpRequest", "PercentHelpRequest"]

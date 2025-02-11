@@ -36,7 +36,7 @@ def feature_dict(df):
     for key in keys:
         feature_types[key] = []
     
-    feature_types["ASR"].append(df.filter(regex='ASR|TimeOut|Barge|UTD|ExMo|WPUT|Modality|grammar_emb|utterance_emb|triggered_grammar').columns)
+    feature_types["ASR"].append(df.filter(regex='ASR|TimeOut|Barge|UTD|ExMo|WPUT|Modality|utterance_emb').columns)
     feature_types["DM"].append(df.filter(regex='WPST|DD|RoleIndex|^Prompt$|Exchange|Turns|SystemQuestions|Activity|RoleName|LoopName|RePrompt').columns)
     feature_types["SLU"].append(df.filter(regex='present').columns)
     feature_types["DAcT"].append(df.filter(regex='DialogueAct').columns)
@@ -71,7 +71,7 @@ def dim_reduce(df, n_components = 50, prefix=""):
     df_reduced = pca.fit_transform(df_scaled) 
     new_cols = [f"{prefix}_{i+1}" for i in range(n_components)] 
     df_with_heads = pd.DataFrame(df_reduced, index=df.index, columns=new_cols)
-    return df_with_heads, pca, scaler
+    return df_with_heads
 
 
 def train_svm(X, y):
@@ -81,12 +81,12 @@ def train_svm(X, y):
     macro_recall_scores = []
     k = 10
     kf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
-    scaler = StandardScaler()
 
     for i, (train_index, val_index) in enumerate(kf.split(X, y)):
         X_train, X_val = X.iloc[train_index], X.iloc[val_index]
         y_train, y_val = y.iloc[train_index], y.iloc[val_index]
 
+        scaler = StandardScaler()
         X_train_scaled = scaler.fit_transform(X_train)
         X_val_scaled = scaler.transform(X_val)
 
@@ -117,54 +117,40 @@ if __name__ == "__main__":
 
     X_train, X_opt, y_train, y_opt = train_opt_split(data)
 
-    embedding_prefixes = ["grammar_emb", "utterance_emb", "triggered_grammar"]
     best_recall = 0
     best_n = 0
+    best_model = None
+    best_feature_set = None
 
     # Test different parameter sizes
-    for n in [25,50,75,100]:
+    for n in [10,20,30,50]:
 
         # Reduce Dimensions for each embedding variable
-        reduced_embeddings = []
-        for prefix in embedding_prefixes:
-            filtered_cols = [col for col in X_train if col.startswith(prefix)]
-            reduced_embeds, pca, scaler = dim_reduce(X_train[filtered_cols], n_components=n, prefix=prefix)
-            reduced_embeddings.append(reduced_embeds)
-
-        all_reduced = pd.concat(reduced_embeddings, axis=1)
-        X_train_reduced = pd.concat([X_train.drop([col for col in X_train if any(emb in col for emb in embedding_prefixes)], axis=1), all_reduced], axis=1)
+        filtered_cols = [col for col in X_train if col.startswith("utterance")]
+        reduced_embeds = dim_reduce(X_train[filtered_cols], n_components=n, prefix="utterance")
+        X_train_reduced = pd.concat([X_train.drop(filtered_cols, axis=1), reduced_embeds], axis=1)
 
         # Create Dictionary of feature types and split data based on feature types
         feature_type_dict = feature_dict(X_train_reduced)
         X_train_dict_reduced, X_train_auto_reduced, X_train_autoemo_reduced = split_features(X_train_reduced, feature_type_dict)
 
-        # Train SVM on different feature sets
-        print(f"Training ALL feature data with {n} embedding dimensions\n")
-        recall = train_svm(X_train_reduced, y_train)
+        feature_sets = {
+            "ALL": X_train_reduced,
+            **feature_type_dict,
+            "AUTO": X_train_auto_reduced,
+            "AUTOEMO": X_train_autoemo_reduced,
+        }
 
-        if recall > best_recall:
-            best_recall = recall
-            best_n = n
+        for name, X_train_subset in feature_sets.items():
+            print(f"Training {name} feature data with {n} embedding dimensions\n")
+            recall = train_svm(X_train_subset, y_train)
 
-        for key, dataframe in X_train_dict_reduced.items():
-            print(f"Training {key} feature data with {n} embedding dimensions\n")
-            recall = train_svm(dataframe, y_train)
             if recall > best_recall:
                 best_recall = recall
                 best_n = n
+                best_feature_set = name
 
-        print(f"Training AUTO feature data with {n} embedding dimensions\n")
-        recall = train_svm(X_train_auto_reduced, y_train)
-        if recall > best_recall:
-            best_recall = recall
-            best_n = n
+    print(f"Best recall of {best_recall} was achieved by {best_n} components per embedding type using {best_feature_set} feature set")
 
-        print(f"Training AUTOEMO feature data with {n} embedding dimensions\n")
-        recall = train_svm(X_train_autoemo_reduced, y_train)
-        if recall > best_recall:
-            best_recall = recall
-            best_n = n
-
-    print(f"Best recall of {best_recall} was achieved by {best_n} components per embedding type")
 
 
