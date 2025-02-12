@@ -121,7 +121,7 @@ if __name__ == "__main__":
     best_feature_set = None
 
     # Test different parameter sizes
-    for n in [10,20,30,50]:
+    for n in [2,5,10,15,20]:
 
         # Reduce Dimensions for each embedding variable
         filtered_cols = [col for col in X_train if col.startswith("utterance")]

@@ -1,7 +1,5 @@
 """ 
-
 Loading, Cleaning and Pre-processing the LEGO Database for classification
-
 """
 
 # Imports
@@ -9,9 +7,6 @@ Loading, Cleaning and Pre-processing the LEGO Database for classification
 import pandas as pd
 import numpy as np
 import re
-import csv
-import json
-
 from pathlib import Path
 from analyse_sem_pas import SemParse
 from sentence_transformers import SentenceTransformer
@@ -21,8 +16,8 @@ from sentence_transformers import SentenceTransformer
 def get_headers(txt_file, columns_to_add):
     """
     Function to extract column_names from readme.txt file and combine with
-    those column names not included in that section of the .txt file but
-    specified by Schmitt et al. (2011) or obvious from examination of csv file. 
+    manually inputted column headers. This ensure the headers align with 
+    Schmitt et al. (2011).
     """
 
     with open(txt_file, 'r', encoding="latin1") as f:
@@ -30,7 +25,7 @@ def get_headers(txt_file, columns_to_add):
     
     column_names = []
     for line_number in range(66, 75):  
-        line = lines[line_number].strip().replace(",", "").replace("#", "Sum").replace("%", "Percent") # Clean column names
+        line = lines[line_number].strip().replace(",", "").replace("#", "Sum").replace("%", "Percent")
         words = line.split()
         for name in words:
             match = re.search(r'\((.*?)\)', name)
@@ -48,23 +43,49 @@ def get_headers(txt_file, columns_to_add):
     return column_names
 
 
-def read_data(data):
+def read_data(data, col_names):
     """
     Function to read LEGO data from interaction.csv
-
-    CSV file is read into Python using delimiter that is identified
+    CSV file is read into Python using delimiter
     """
     
-    with open(data, 'r', encoding='latin1') as file:
-        try:
-            dialect = csv.Sniffer().sniff(file.read(1024))
-            delimiter = dialect.delimiter
-            print(f"Detected delimiter: {delimiter}")
-        except csv.Error:
-            delimiter = ';' 
-            print(f"Default delimiter used: {delimiter}")
+    null_values = ["", "nan","NA", "null", "None", "\\N"]
+
+    delimiter = ';'
     
-    df = pd.read_csv(data, encoding='latin1', header=None, delimiter=delimiter)
+    df = pd.read_csv(data, 
+                     encoding='latin1', 
+                     header=None, 
+                     delimiter=delimiter, 
+                     names = col_names, 
+                     on_bad_lines='skip', 
+                     na_values=null_values)
+
+    return df
+
+
+def manage_malformed_rows(df):
+    """
+    Identifies and fixes rows where the specified column contains malformed data pattern.
+    """
+    # Identify Malformed Rows
+    malformed_rows = df[df.iloc[:, 1].str.strip().str.match(r'^\(\-?\d+\):', na=False)]
+
+    # Iterate through malformed rows and split column info appropriately
+    malformed_array = df.loc[malformed_rows.index].values
+    new_rows = []
+    for row in malformed_array:
+        combined_data = ";".join((pd.Series(row, index=df.columns)).astype(str))
+        split_data = combined_data.split(";")
+        new_row = pd.Series(split_data[:df.shape[1]], index=df.columns)
+        new_rows.append(new_row)
+    
+    # Combine the adapted rows and concatenate with original df
+    new_rows_df = pd.DataFrame(new_rows, index=malformed_rows.index)
+    non_malformed_cols = df.columns.difference(new_rows_df.columns)
+    combined_df = pd.concat([new_rows_df, df[non_malformed_cols]], axis=1)
+    df.loc[malformed_rows.index] = combined_df
+
     return df
 
 
@@ -109,41 +130,30 @@ def extract_sentence_embeddings(data, column, prefix):
     return embeddings_df
 
 
-def clean_data(df, column_names, dummy_columns, drop_columns):
+def clean_data(df, dummy_columns, drop_columns):
     """
-    The following steps are taken to clean the data:
-    4. information from semantic parser column extracted in ML appropriate format
-    5. columns not necessary for ML pipeline dropped
-    6. categorical variables dummy coded
     """
+    df = manage_malformed_rows(df)
 
-    # Column headers added
+    df["ASRRecognitionStatus"] = df["ASRRecognitionStatus"].replace('"', '')
+    df["ExMo"] = df["ExMo"].replace('"', '')
 
-    df.columns = column_names
-
-    # Categorical variable labels changed if inconsistent with documentation
 
     replace_ASR = {'no input': 'timeout', 'no match': 'reject', 'complete': 'success'}
     replace_modality = {'voice': 'speech'}   
 
     df["ASRRecognitionStatus"] = df["ASRRecognitionStatus"].replace(replace_ASR)
     df["Modality"] = df["Modality"].replace(replace_modality)
-
-    # Null values removed
-     
-    null_values = ["", "nan","NA", "null", "None", "\\N"]
-    df = df.replace(null_values, pd.NA, regex=False)
-    df = df.dropna(subset=["IQAverage"])
-
-    # Drop First Turn of each video
-
+    
     df = df.drop(df.loc[df['SystemDialogueAct'].isin(["SDA_GREETING", "SDA_OFFERHELP"])].index)
     df = df.reset_index(drop=True)
 
-    # Preprocessing of SemanticParse Column
+    null_values = ["", "nan","NA", "null", "None", "\\N"]
+    
+    df = df.replace(null_values, pd.NA, regex=False)
+    df = df.astype(str).replace('nan', pd.NA)
 
     sem_keys = extract_keys_sem_parse(df)
-
     df.loc[df['SemanticParse'] == "Semantic no match", 'SemanticParse'] = "semantic_no_match"
 
     for key in sem_keys:
@@ -151,18 +161,16 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
             df[key + '_present'] = df['SemanticParse'].str.contains(r'\b' + re.escape(key) + r'\b', case=False, regex=True).replace(pd.NA, False)
         else: 
             continue
-    
-    # Extract sentence embeddings for Utterance Column
 
     embed_utterance = extract_sentence_embeddings(df, "Utterance", prefix= "utterance_emb")
     df_with_embeddings = pd.concat([df, embed_utterance], axis = 1)
 
-    # Remove columns not required for classifier
-
     df_dropped = df_with_embeddings.drop(drop_columns, axis=1)
-    df = df.replace(null_values, pd.NA, regex=False)
 
-    # Dummy code categorical variables
+    df_dropped["IQAverage"] = df_dropped["IQAverage"].fillna("0")
+    
+    for col in df_dropped.columns:
+        df_dropped[col] = df_dropped[col].astype(str).replace(r'\.0$', '', regex=True)
 
     df_dummy = pd.get_dummies(data=df_dropped, columns=dummy_columns)
 
@@ -174,7 +182,7 @@ def clean_data(df, column_names, dummy_columns, drop_columns):
 if __name__ == "__main__":
     base_path = Path("/home/acp23prg/fastdata/projects/iq_lego/LEGOv2/corpus")
     IQ_file = base_path / "csv/interactions.csv"
-    new_file = base_path / "csv/clean_interactions.csv"
+    new_file = base_path / "csv/clean_interactions_all.csv"
     read_me = base_path.parent / "readme.txt" 
 
     add_col = ["FileCode", "WavFile", "EmotionState", "IQ1", "IQ2", "IQ3", "IQAverage"]
@@ -182,10 +190,12 @@ if __name__ == "__main__":
     drop_col = ['Prompt', 'Utterance', 'SemanticParse', 'WavFile', "IQ1", "IQ2", "IQ3", "HelpRequest?", "SumHelpRequests", "ContextSumHelpRequest", "PercentHelpRequest"]
 
     column_names = get_headers(read_me, add_col)
-    uncleaned_df = read_data(IQ_file)
-    cleaned_df = clean_data(uncleaned_df, column_names, dummy_col, drop_col)
+    uncleaned_df = read_data(IQ_file, column_names)
+    cleaned_df = clean_data(uncleaned_df, dummy_col, drop_col)
     cleaned_df.to_csv(new_file, index = False, header = True)
 
     for column in cleaned_df.columns:
         print(f"\nColumn: {column}")
         print(cleaned_df[column].unique()) 
+    
+    print(cleaned_df.isna().sum())
